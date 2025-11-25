@@ -1,0 +1,22 @@
+﻿{% extends "base.html" %}
+{% block title %}Selecionar Cidade{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm p-4">
+  <h4 class="mb-3">Selecione a cidade onde está fazendo compras</h4>
+
+  <form method="POST">
+    <div class="mb-3">
+      <label class="form-label">Cidade</label>
+      <select name="cidade" class="form-select">
+        <option value="">Selecionar...</option>
+        {% for c in cidades %}
+          <option value="{{ c }}">{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button class="btn btn-primary">Confirmar</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,168 @@
+﻿{% extends "base.html" %} 
+{% block content %}
+<h1>Mercados</h1>
+
+{% set is_admin = g.current_user and g.current_user.is_admin_any %}
+
+{# FORM: Novo mercado – só para admin master #}
+{% if is_admin %}
+<form method="post" class="row g-2 mb-4 bg-white p-3 rounded shadow-sm">
+  <input type="hidden" name="acao" value="novo">
+
+  <div class="col-md-4">
+    <label class="form-label">Nome</label>
+    <input class="form-control" name="nome" placeholder="Ex.: Supermercado Bom Preço" required>
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">CNPJ</label>
+    <input class="form-control" name="cnpj" placeholder="00.000.000/0000-00">
+  </div>
+
+  <div class="col-md-5">
+    <label class="form-label">E-mail</label>
+    <input class="form-control" type="email" name="email" placeholder="contato@mercado.com.br">
+  </div>
+
+  <div class="col-md-5">
+    <label class="form-label">Logradouro</label>
+    <input class="form-control" name="logradouro" placeholder="Rua / Avenida">
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Número</label>
+    <input class="form-control" name="numero" placeholder="123">
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Bairro</label>
+    <input class="form-control" name="bairro" placeholder="Centro">
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">CEP</label>
+    <input class="form-control" name="cep" placeholder="00000-000">
+  </div>
+
+  <div class="col-md-4">
+    <label class="form-label">Cidade</label>
+    <input class="form-control" name="cidade" placeholder="Cidade">
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">UF</label>
+    <input class="form-control" name="uf" placeholder="PE" maxlength="2">
+  </div>
+
+  <div class="col-md-3 d-flex align-items-end">
+    <button class="btn btn-success w-100">Adicionar</button>
+  </div>
+  <div class="col-md-3 d-flex align-items-end">
+    <button class="btn btn-outline-secondary w-100"
+            name="acao" value="deduplicar" formnovalidate>
+      Deduplicar por CNPJ
+    </button>
+  </div>
+</form>
+{% endif %}
+
+{% if msg %}
+  <div class="alert alert-info">{{ msg }}</div>
+{% endif %}
+
+<!-- LISTA -->
+<table class="table table-hover align-middle">
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>CNPJ</th>
+      <th>Endereço</th>
+      <th>Cidade/UF</th>
+      <th>E-mail</th>
+      {% if is_admin %}
+        <th style="width:340px">Ações</th>
+      {% endif %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for m in mercados %}
+    <tr>
+      <td>{{ m.nome }}</td>
+      <td>{{ m.cnpj or "-" }}</td>
+      <td>
+        {{ m.logradouro or "" }} {{ m.numero or "" }}
+        {% if m.bairro %}, {{ m.bairro }}{% endif %}
+        {% if m.cep %} — {{ m.cep }}{% endif %}
+      </td>
+      <td>{{ m.cidade or "-" }} / {{ m.uf or "-" }}</td>
+      <td>{{ m.email or "-" }}</td>
+
+      {% if is_admin %}
+      <td class="text-nowrap">
+        <!-- Excluir (apenas admin) -->
+        <form method="post" class="d-inline">
+          <input type="hidden" name="acao" value="excluir">
+          <input type="hidden" name="id" value="{{ m.id }}">
+          <button class="btn btn-sm btn-danger"
+                  onclick="return confirm('Excluir o mercado &quot;{{ m.nome }}&quot; e seus preços?')">
+            Excluir
+          </button>
+        </form>
+
+        <!-- Editar (apenas admin) -->
+        <details class="d-inline-block ms-2">
+          <summary class="btn btn-sm btn-outline-primary">Editar</summary>
+          <form method="post"
+                class="mt-2 p-2 border rounded bg-white"
+                style="min-width: 680px;">
+            <input type="hidden" name="acao" value="atualizar">
+            <input type="hidden" name="id" value="{{ m.id }}">
+            <div class="row g-2">
+              <div class="col-md-4">
+                <input class="form-control" name="nome"
+                       value="{{ m.nome }}" placeholder="Nome">
+              </div>
+              <div class="col-md-4">
+                <input class="form-control" name="cnpj"
+                       value="{{ m.cnpj }}" placeholder="CNPJ">
+              </div>
+              <div class="col-md-4">
+                <input class="form-control" type="email" name="email"
+                       value="{{ m.email }}" placeholder="E-mail">
+              </div>
+
+              <div class="col-md-4">
+                <input class="form-control" name="logradouro"
+                       value="{{ m.logradouro }}" placeholder="Logradouro">
+              </div>
+              <div class="col-md-2">
+                <input class="form-control" name="numero"
+                       value="{{ m.numero }}" placeholder="Número">
+              </div>
+              <div class="col-md-3">
+                <input class="form-control" name="bairro"
+                       value="{{ m.bairro }}" placeholder="Bairro">
+              </div>
+              <div class="col-md-3">
+                <input class="form-control" name="cep"
+                       value="{{ m.cep }}" placeholder="CEP">
+              </div>
+
+              <div class="col-md-3">
+                <input class="form-control" name="cidade"
+                       value="{{ m.cidade }}" placeholder="Cidade">
+              </div>
+              <div class="col-md-2">
+                <input class="form-control" name="uf"
+                       value="{{ m.uf }}" placeholder="UF" maxlength="2">
+              </div>
+
+              <div class="col-md-3">
+                <button class="btn btn-primary w-100">Salvar</button>
+              </div>
+            </div>
+          </form>
+        </details>
+      </td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,37 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<h1>Produtos</h1>
+
+<form method="post" class="row g-2 mb-3">
+  <input type="hidden" name="acao" value="novo">
+  <div class="col-md-6"><input class="form-control" name="nome" placeholder="Nome do produto"></div>
+  <div class="col-md-2"><button class="btn btn-success w-100">Adicionar</button></div>
+  <div class="col-md-2">
+    <button class="btn btn-outline-secondary w-100" name="acao" value="deduplicar" formnovalidate>Deduplicar</button>
+  </div>
+</form>
+
+<table class="table table-striped">
+  <thead><tr><th>Nome</th><th style="width:240px">Ações</th></tr></thead>
+  <tbody>
+    {% for p in produtos %}
+    <tr>
+      <td>{{ p.nome }}</td>
+      <td>
+        <form method="post" class="d-inline">
+          <input type="hidden" name="acao" value="excluir">
+          <input type="hidden" name="id" value="{{ p.id }}">
+          <button class="btn btn-sm btn-danger" onclick="return confirm('Excluir produto?')">Excluir</button>
+        </form>
+        <form method="post" class="d-inline">
+          <input type="hidden" name="acao" value="atualizar">
+          <input type="hidden" name="id" value="{{ p.id }}">
+          <input class="form-control d-inline w-50" name="nome" value="{{ p.nome }}">
+          <button class="btn btn-sm btn-primary">Salvar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

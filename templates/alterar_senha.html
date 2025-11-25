@@ -1,0 +1,31 @@
+﻿{% extends "base.html" %}
+{% block title %}Alterar senha – ConfereApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <h2 class="mb-4 text-center">Alterar senha</h2>
+
+    {% if erro %}
+      <div class="alert alert-danger">{{ erro }}</div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('alterar_senha') }}">
+      <div class="mb-3">
+        <label class="form-label" for="senha_atual">Senha atual</label>
+        <input type="password" id="senha_atual" name="senha_atual" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="senha_nova">Nova senha</label>
+        <input type="password" id="senha_nova" name="senha_nova" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="senha_conf">Confirmar nova senha</label>
+        <input type="password" id="senha_conf" name="senha_conf" class="form-control" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Alterar senha</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

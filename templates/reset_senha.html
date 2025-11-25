@@ -1,0 +1,27 @@
+﻿{% extends "base.html" %}
+{% block title %}Redefinir senha – ConfereApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <h2 class="mb-4 text-center">Redefinir senha</h2>
+
+    <p class="mb-3">
+      E-mail: <strong>{{ email }}</strong>
+    </p>
+
+    <form method="post" action="{{ url_for('reset_senha', token=token) }}">
+      <div class="mb-3">
+        <label class="form-label" for="senha">Nova senha</label>
+        <input type="password" id="senha" name="senha" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="conf">Confirmar nova senha</label>
+        <input type="password" id="conf" name="conf" class="form-control" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Salvar nova senha</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

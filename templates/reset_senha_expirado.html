@@ -1,0 +1,6 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<h1>Link inválido ou expirado</h1>
+<p class="text-muted">O link de redefinição de senha não é mais válido.</p>
+<a class="btn btn-primary" href="{{ url_for('esqueci_senha') }}">Solicitar novo link</a>
+{% endblock %}

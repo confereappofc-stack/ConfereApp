@@ -1,0 +1,91 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Gerenciar Usuários</h2>
+
+  <form class="row g-2 my-3" method="get" action="{{ url_for('usuarios') }}">
+    <div class="col-auto">
+      <input type="text" class="form-control" name="q" placeholder="Buscar por nome ou e-mail" value="{{ q or '' }}">
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary">Buscar</button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nome</th>
+          <th>E-mail</th>
+          <th>Status</th>
+          <th>Papel</th>
+          {% if current_user and current_user.is_admin_geral %}
+            <th style="width: 340px;">Ações</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% if usuarios %}
+          {% for u in usuarios %}
+          <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.nome }}</td>
+            <td>{{ u.email }}</td>
+            <td>
+              {% if u.ativo %}<span class="badge bg-success">Ativo</span>{% else %}<span class="badge bg-secondary">Inativo</span>{% endif %}
+            </td>
+            <td>
+              {% if u.role == 'admin_geral' %}Admin Geral
+              {% elif u.role == 'admin_tecnico' %}Admin Técnico
+              {% else %}Usuário{% endif %}
+            </td>
+
+            {% if current_user and current_user.is_admin_geral %}
+            <td>
+              <div class="d-flex flex-wrap gap-2">
+                <!-- Promover/Demover -->
+                <form method="post" action="{{ url_for('usuarios_set_role', user_id=u.id) }}" class="d-inline">
+                  <input type="hidden" name="role" value="admin_geral">
+                  <button class="btn btn-sm btn-outline-primary" {% if u.role == 'admin_geral' %}disabled{% endif %}>
+                    Tornar Admin Geral
+                  </button>
+                </form>
+                <form method="post" action="{{ url_for('usuarios_set_role', user_id=u.id) }}" class="d-inline">
+                  <input type="hidden" name="role" value="admin_tecnico">
+                  <button class="btn btn-sm btn-outline-info" {% if u.role == 'admin_tecnico' %}disabled{% endif %}>
+                    Tornar Admin Técnico
+                  </button>
+                </form>
+                <form method="post" action="{{ url_for('usuarios_set_role', user_id=u.id) }}" class="d-inline">
+                  <input type="hidden" name="role" value="user">
+                  <button class="btn btn-sm btn-outline-secondary" {% if u.role == 'user' %}disabled{% endif %}>
+                    Remover Admin
+                  </button>
+                </form>
+
+                <!-- Ativar/Desativar -->
+                <form method="post" action="{{ url_for('usuarios_toggle_ativo', user_id=u.id) }}" class="d-inline">
+                  <button class="btn btn-sm {% if u.ativo %}btn-outline-warning{% else %}btn-outline-success{% endif %}">
+                    {% if u.ativo %}Desativar{% else %}Ativar{% endif %}
+                  </button>
+                </form>
+
+                <!-- Excluir definitivo -->
+                <form method="post" action="{{ url_for('usuarios_delete', user_id=u.id) }}" class="d-inline" onsubmit="return confirm('Excluir o usuário {{u.nome}}? Essa ação não pode ser desfeita.');">
+                  <button class="btn btn-sm btn-outline-danger">Excluir</button>
+                </form>
+              </div>
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr><td colspan="6" class="text-center text-muted py-4">Nenhum usuário encontrado.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

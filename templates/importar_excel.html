@@ -1,0 +1,41 @@
+﻿{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-3">Importar Preços via Excel</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label class="form-label">Selecione um arquivo (.xlsx)</label>
+            <input type="file" class="form-control" name="arquivo" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Importar</button>
+    </form>
+
+    <hr>
+
+    {% if resumo %}
+        {% set lidas, inseridas, total_erros = resumo %}
+        <div class="alert alert-info mt-3">
+            <strong>Resumo da importação:</strong><br>
+            ✅ Linhas Lidas: <b>{{ lidas }}</b><br>
+            ✅ Preços Inseridos/Atualizados: <b>{{ inseridas }}</b><br>
+            ⚠️ Erros: <b>{{ total_erros }}</b>
+        </div>
+    {% endif %}
+
+    {% if erros %}
+        <div class="alert alert-warning">
+            <strong>Detalhes dos erros:</strong>
+        </div>
+        <ul class="list-group mb-4">
+            {% for e in erros %}
+            <li class="list-group-item list-group-item-warning">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+</div>
+
+{% endblock %}

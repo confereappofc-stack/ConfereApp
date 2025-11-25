@@ -1,0 +1,88 @@
+﻿{% extends "base.html" %}
+{% block title %}{{ 'Editar mercado' if mercado else 'Novo mercado' }} - ConfereApp{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1 class="mb-3">
+    {{ 'Editar mercado' if mercado else 'Novo mercado' }}
+  </h1>
+
+  <form method="post">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Nome do mercado *</label>
+        <input type="text" name="nome" class="form-control"
+               value="{{ mercado.nome if mercado else '' }}" required>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">CNPJ</label>
+        <input type="text" name="cnpj" class="form-control"
+               value="{{ mercado.cnpj if mercado else '' }}"
+               placeholder="00.000.000/0000-00">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">E-mail</label>
+        <input type="email" name="email" class="form-control"
+               value="{{ mercado.email if mercado else '' }}">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Logradouro</label>
+        <input type="text" name="logradouro" class="form-control"
+               value="{{ mercado.logradouro if mercado else '' }}">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Número</label>
+        <input type="text" name="numero" class="form-control"
+               value="{{ mercado.numero if mercado else '' }}">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Bairro</label>
+        <input type="text" name="bairro" class="form-control"
+               value="{{ mercado.bairro if mercado else '' }}">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Cidade</label>
+        <input type="text" name="cidade" class="form-control"
+               value="{{ mercado.cidade if mercado else '' }}">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">UF</label>
+        <input type="text" name="uf" class="form-control"
+               value="{{ mercado.uf if mercado else '' }}" maxlength="2">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">CEP</label>
+        <input type="text" name="cep" class="form-control"
+               value="{{ mercado.cep if mercado else '' }}"
+               placeholder="00000-000">
+      </div>
+
+      {% if mercado and mercado.lat and mercado.lng %}
+      <div class="col-md-6">
+        <label class="form-label">Coordenadas atuais</label>
+        <div class="form-control-plaintext">
+          {{ '%.6f'|format(mercado.lat) }}, {{ '%.6f'|format(mercado.lng) }}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="mt-4 d-flex justify-content-between">
+      <a href="{{ url_for('admin_mercados') }}" class="btn btn-secondary">
+        Voltar
+      </a>
+      <button type="submit" class="btn btn-primary">
+        Salvar
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+﻿{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="m-0">Minha Lista de Compras</h3>
+    <div class="small text-secondary">
+      Itens adicionados à lista deste usuário.
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <form method="post" action="{{ url_for('limpar_minha_lista') }}"
+          onsubmit="return confirm('Tem certeza que deseja limpar toda a lista?');">
+      <button class="btn btn-outline-danger btn-sm">
+        <i class="fa-solid fa-broom"></i> Limpar lista
+      </button>
+    </form>
+    <a href="{{ url_for('export_minha_lista_csv') }}" class="btn btn-primary btn-sm">
+      <i class="fa-solid fa-file-excel"></i> Exportar Excel
+    </a>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    {% if itens and itens|length > 0 %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th class="text-end">Quantidade</th>
+              <th>Adicionado em</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in itens %}
+            <tr>
+              <td>{{ r.nome }}</td>
+              <td class="text-end">{{ r.quantidade }}</td>
+              <td>{{ r.criado_em.strftime('%d/%m/%Y %H:%M') if r.criado_em else '' }}</td>
+              <td class="text-center">
+                <form method="post"
+                      action="{{ url_for('remover_item_minha_lista', item_id=r.id) }}"
+                      onsubmit="return confirm('Remover este item da lista?');">
+                  <button class="btn btn-sm btn-outline-danger">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colspan="4" class="text-end">
+                Total de itens: {{ total_itens }}
+              </th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-secondary mb-0">Nenhum item na sua lista ainda.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

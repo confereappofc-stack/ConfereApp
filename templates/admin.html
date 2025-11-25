@@ -1,0 +1,18 @@
+<h2>Painel do Administrador</h2>
+<p>Total de produtos cadastrados: {{ total }}</p>
+<h3>Usuários</h3>
+<table border="1">
+<tr><th>ID</th><th>Nome</th><th>Email</th><th>Data Criação</th><th>Plano</th></tr>
+{% for u in usuarios %}
+<tr><td>{{ u[0] }}</td><td>{{ u[1] }}</td><td>{{ u[2] }}</td><td>{{ u[3] }}</td><td>{{ u[4] }}</td></tr>
+{% endfor %}
+</table>
+<br>
+<h3>Importar Produtos (.csv)</h3>
+<form method="POST" action="/importar_csv" enctype="multipart/form-data">
+    <input type="file" name="csvfile" required>
+    <button type="submit">Importar</button>
+</form>
+<br>
+<p><a href="/adicionar_produto">Adicionar Produto Manualmente</a></p>
+<p><a href="/logout">Sair</a></p>

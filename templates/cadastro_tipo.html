@@ -1,0 +1,41 @@
+﻿{% extends "base.html" %}
+{% block title %}Cadastre-se – ConfereApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 text-center">
+    <h2 class="mb-4">Como você quer usar o ConfereApp?</h2>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <div class="card h-100">
+          <div class="card-body d-flex flex-column">
+            <h4>Sou Cliente</h4>
+            <p class="flex-grow-1">
+              Quero montar minha lista de compras e comparar preços entre mercados.
+            </p>
+            <a href="{{ url_for('registrar_cliente') }}" class="btn btn-primary mt-auto">
+              Criar conta de cliente
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <div class="card h-100">
+          <div class="card-body d-flex flex-column">
+            <h4>Sou Empresa / Mercado</h4>
+            <p class="flex-grow-1">
+              Quero cadastrar meus preços e aparecer na comparação do ConfereApp.
+            </p>
+            <a href="{{ url_for('registrar_empresa') }}" class="btn btn-outline-primary mt-auto">
+              Criar conta de empresa
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

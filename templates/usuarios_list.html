@@ -1,0 +1,101 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Lista de usuários ({{ usuarios|length }} registros)</h3>
+
+  <div class="table-responsive mt-3">
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>E-mail</th>
+          <th>Tipo</th>
+          <th>Perfil</th>
+          <th>Status</th>
+          <th>Criado em</th>
+          <th style="width: 140px;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in usuarios %}
+        <tr>
+          <td>{{ u.id }}</td>
+          <td>{{ u.nome }}</td>
+          <td>{{ u.email }}</td>
+
+          <!-- TIPO (cliente / empresa / outro) -->
+          <td>
+            <form method="post" class="d-inline">
+              <input type="hidden" name="user_id" value="{{ u.id }}">
+              <input type="hidden" name="acao" value="tipo">
+              <select name="tipo" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">—</option>
+                <option value="cliente" {{ 'selected' if (u.tipo or '') == 'cliente' }}>cliente</option>
+                <option value="empresa" {{ 'selected' if (u.tipo or '') == 'empresa' }}>empresa</option>
+                <option value="tecnico" {{ 'selected' if (u.tipo or '') == 'tecnico' }}>técnico</option>
+              </select>
+            </form>
+          </td>
+
+          <!-- PERFIL / ROLE (user, admin, tecnico, owner) -->
+          <td>
+            <form method="post" class="d-inline">
+              <input type="hidden" name="user_id" value="{{ u.id }}">
+              <input type="hidden" name="acao" value="role">
+              <select name="role" class="form-select form-select-sm" onchange="this.form.submit()">
+                {% set role = (u.role or 'user') %}
+                <option value="user"    {{ 'selected' if role == 'user' }}>Usuário</option>
+                <option value="admin"   {{ 'selected' if role == 'admin' }}>Admin geral</option>
+                <option value="tecnico" {{ 'selected' if role == 'tecnico' }}>Admin técnico</option>
+                <option value="owner"   {{ 'selected' if role == 'owner' }}>Master</option>
+              </select>
+            </form>
+          </td>
+
+          <!-- STATUS (Ativo / Inativo) -->
+          <td>
+            <form method="post" class="d-inline">
+              <input type="hidden" name="user_id" value="{{ u.id }}">
+              <input type="hidden" name="acao" value="toggle_ativo">
+              {% if u.ativo %}
+                <button type="submit" class="btn btn-sm btn-success">
+                  Ativo
+                </button>
+              {% else %}
+                <button type="submit" class="btn btn-sm btn-secondary">
+                  Inativo
+                </button>
+              {% endif %}
+            </form>
+          </td>
+
+          <td>
+            {% if u.criado_em %}
+              {{ u.criado_em.strftime('%d/%m/%Y %H:%M') }}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+
+          <!-- AÇÕES -->
+          <td>
+            {% if current_user_id == u.id %}
+              <span class="text-muted">Você</span>
+            {% else %}
+              <form method="post" class="d-inline" onsubmit="return confirm('Remover / desativar este usuário?');">
+                <input type="hidden" name="user_id" value="{{ u.id }}">
+                <input type="hidden" name="acao" value="remover">
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                  Remover
+                </button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

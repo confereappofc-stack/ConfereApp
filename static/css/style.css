@@ -1,0 +1,430 @@
+﻿/* ================================
+   TEMA GERAL CONFEREAPP
+   ================================ */
+
+/* Mensagens informativas em páginas específicas (ex: comparar.html) */
+.compare-info-message {
+  background-color: #ffffff;            /* fundo branco pra dar contraste */
+  color: #111827;                       /* texto bem escuro */
+  border-left: 4px solid #198754;       /* barrinha verde (cor do sucesso) */
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.compare-info-message strong {
+  color: #14532d;                       /* destaque ainda mais forte no <strong> */
+}
+
+:root {
+  --ca-bg: #050810;
+  --ca-bg-soft: #0b101b;
+  --ca-card: #101622;
+  --ca-card-soft: #151c2b;
+  --ca-border-soft: rgba(255, 255, 255, 0.05);
+
+  --ca-green: #28e070;
+  --ca-green-soft: #1ac15a;
+  --ca-green-dark: #0b8b3a;
+  --ca-green-glow: rgba(40, 224, 112, 0.35);
+
+  --ca-text-main: #f9fafb;
+  --ca-text-muted: #9ca3af;
+  --ca-text-soft: #6b7280;
+
+  --ca-danger: #f97373;
+  --ca-warning: #facc15;
+}
+
+/* Fundo geral */
+
+body {
+  background: radial-gradient(circle at top, #0b1625 0, #050810 45%, #02030a 100%);
+  color: var(--ca-text-main);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Barra de navegação */
+
+.navbar {
+  background: rgba(5, 8, 16, 0.96) !important;
+  border-bottom: 1px solid var(--ca-border-soft);
+  backdrop-filter: blur(18px);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.navbar-brand-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, #ffffff, var(--ca-green));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 14px var(--ca-green-glow);
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  color: var(--ca-text-muted);
+  font-weight: 500;
+}
+
+.navbar-dark .navbar-nav .nav-link.active,
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: var(--ca-green);
+}
+
+/* Container padrão do conteúdo */
+
+.container {
+  max-width: 1080px;
+}
+
+/* Títulos */
+
+h1, h2, h3, h4 {
+  color: var(--ca-text-main);
+  letter-spacing: 0.02em;
+}
+
+.page-subtitle {
+  color: var(--ca-text-muted);
+  font-size: 0.9rem;
+}
+
+/* ================================
+   COMPONENTES BASE
+   ================================ */
+
+.ca-card {
+  background: linear-gradient(135deg, var(--ca-card) 0%, var(--ca-bg-soft) 100%);
+  border-radius: 18px;
+  border: 1px solid var(--ca-border-soft);
+  padding: 1.1rem 1.2rem;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(15, 23, 42, 0.8);
+}
+
+.ca-card-soft {
+  background: linear-gradient(135deg, var(--ca-card-soft) 0%, var(--ca-card) 100%);
+  border-radius: 14px;
+  border: 1px solid var(--ca-border-soft);
+  padding: 0.9rem 1rem;
+}
+
+.ca-card-highlight {
+  position: relative;
+  border: 1px solid rgba(250, 204, 21, 0.8);
+  box-shadow: 0 0 24px rgba(250, 204, 21, 0.35);
+}
+
+.ca-badge-mini {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  color: var(--ca-text-muted);
+}
+
+.ca-badge-best {
+  background: var(--ca-green);
+  color: #020617;
+  font-weight: 700;
+}
+
+/* Botões */
+
+.btn-confere {
+  background: linear-gradient(135deg, var(--ca-green) 0%, var(--ca-green-soft) 50%, var(--ca-green-dark) 100%);
+  border: none;
+  color: #020617;
+  font-weight: 600;
+  border-radius: 999px;
+  padding-inline: 1.6rem;
+  box-shadow: 0 12px 28px var(--ca-green-glow);
+}
+
+.btn-confere:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 18px 38px var(--ca-green-glow);
+}
+
+.btn-outline-confere {
+  border-radius: 999px;
+  border: 1px solid var(--ca-green);
+  color: var(--ca-green);
+  background: transparent;
+  font-weight: 500;
+}
+
+.btn-outline-confere:hover {
+  background: var(--ca-green);
+  color: #020617;
+}
+
+/* Alertas com visual dark */
+
+.alert {
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* Info em azul/escuro */
+.alert-info {
+  background: rgba(15, 23, 42, 0.8);
+  color: var(--ca-text-main);
+}
+
+/* Sucesso bem visível no tema escuro */
+.alert-success {
+  background: linear-gradient(
+    90deg,
+    rgba(34, 197, 94, 0.18),
+    rgba(5, 46, 22, 0.95)
+  );
+  border-color: rgba(34, 197, 94, 0.8);
+  color: #dcfce7; /* texto verde-bem-claro */
+  font-weight: 500;
+}
+
+/* Erro */
+.alert-danger {
+  background: rgba(127, 29, 29, 0.35);
+  color: #fee2e2;
+}
+
+/* Inputs / campos */
+
+.form-control,
+.form-select {
+  background: rgba(15, 23, 42, 0.95);
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  color: var(--ca-text-main);
+  font-size: 0.9rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--ca-green);
+  box-shadow: 0 0 0 1px var(--ca-green-glow);
+  background: rgba(15, 23, 42, 1);
+  color: #fff;
+}
+
+/* ================================
+   LISTA DE COMPRAS
+   ================================ */
+
+.ca-list-wrapper {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ca-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: radial-gradient(circle at top left, rgba(40, 224, 112, 0.08), transparent 60%),
+              radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.9), #020617);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.ca-list-main {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.ca-list-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--ca-green);
+}
+
+.ca-list-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.ca-list-subtitle {
+  font-size: 0.8rem;
+  color: var(--ca-text-muted);
+}
+
+.ca-list-right {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.ca-chip {
+  border-radius: 999px;
+  padding: 0.18rem 0.7rem;
+  font-size: 0.75rem;
+  background: rgba(15, 23, 42, 0.9);
+  color: var(--ca-text-soft);
+}
+
+/* ================================
+   RANKING / COMPARAÇÃO
+   ================================ */
+
+.ca-ranking-wrapper {
+  margin-top: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ca-ranking-item {
+  border-radius: 16px;
+  padding: 0.9rem 1.1rem;
+  background: linear-gradient(135deg, #020617, #020617 30%, #0b1120 100%);
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.ca-ranking-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.ca-ranking-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.ca-ranking-meta {
+  font-size: 0.75rem;
+  color: var(--ca-text-muted);
+}
+
+.ca-ranking-price {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ca-ranking-price-best {
+  color: var(--ca-green);
+}
+
+/* “Você economizou X” */
+
+.ca-savings-panel {
+  position: relative;
+  margin-top: 1.2rem;
+  padding: 1.2rem 1.4rem;
+  border-radius: 18px;
+  background: radial-gradient(circle at top, rgba(40, 224, 112, 0.12), transparent 60%),
+              linear-gradient(135deg, #020617, #020617 40%, #020617 100%);
+  border: 1px solid rgba(34, 197, 94, 0.55);
+  box-shadow: 0 0 30px var(--ca-green-glow);
+}
+
+.ca-savings-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ca-text-muted);
+}
+
+.ca-savings-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--ca-green);
+}
+
+.ca-savings-sub {
+  font-size: 0.8rem;
+  color: var(--ca-text-muted);
+}
+/* ================================
+   AJUSTE GERAL DOS BOTÕES BOOTSTRAP
+   para seguir o padrão do ConfereApp
+   ================================ */
+
+/* Substitui btn-primary azul */
+.btn-primary {
+    background: linear-gradient(135deg, var(--ca-green) 0%, var(--ca-green-soft) 50%, var(--ca-green-dark) 100%) !important;
+    border: none !important;
+    color: #020617 !important;
+    font-weight: 600 !important;
+    border-radius: 999px !important;
+    padding-inline: 1.6rem !important;
+    box-shadow: 0 12px 28px var(--ca-green-glow) !important;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.05) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 18px 38px var(--ca-green-glow) !important;
+}
+
+/* Substitui os btn-outline-primary */
+.btn-outline-primary {
+    border-radius: 999px !important;
+    border: 1px solid var(--ca-green) !important;
+    color: var(--ca-green) !important;
+    background: transparent !important;
+    font-weight: 500 !important;
+}
+
+.btn-outline-primary:hover {
+    background: var(--ca-green) !important;
+    color: #020617 !important;
+}
+.ca-map-btn {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(40, 224, 112, 0.15);
+    border: 1px solid var(--ca-green);
+    color: var(--ca-green);
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.ca-map-btn:hover {
+    background: var(--ca-green);
+    color: #020617;
+}
+
+.btn-outline-danger-confere {
+    border-radius: 999px;
+    border: 1px solid var(--ca-danger);
+    color: var(--ca-danger);
+    background: transparent;
+    font-weight: 500;
+}
+
+.btn-outline-danger-confere:hover {
+    background: var(--ca-danger);
+    color: #020617;
+}

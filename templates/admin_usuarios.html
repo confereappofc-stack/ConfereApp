@@ -1,0 +1,97 @@
+﻿{% extends "base.html" %}
+{% block title %}Admin • Usuários{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h1 class="h4 mb-3">Gerenciar Usuários</h1>
+
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-auto">
+      <input class="form-control" type="text" name="q" placeholder="Buscar por nome ou e-mail" value="{{ q or '' }}">
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary"><i class="fa fa-search"></i> Buscar</button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table align-middle table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nome</th>
+          <th>E-mail</th>
+          <th>Status</th>
+          <th>Papel</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in usuarios %}
+        <tr>
+          <td>{{ u.id }}</td>
+          <td>{{ u.nome }}</td>
+          <td>{{ u.email }}</td>
+          <td>
+            {% if u.ativo %}
+              <span class="badge text-bg-success">Ativo</span>
+            {% else %}
+              <span class="badge text-bg-secondary">Inativo</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if u.role == 'admin_geral' %}
+              <span class="badge text-bg-warning"><i class="fa-solid fa-crown me-1"></i>Admin Geral</span>
+            {% elif u.role == 'admin_tecnico' %}
+              <span class="badge text-bg-primary"><i class="fa-solid fa-screwdriver-wrench me-1"></i>Admin Técnico</span>
+            {% else %}
+              <span class="badge text-bg-light text-dark"><i class="fa-regular fa-user me-1"></i>Usuário</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+
+            <!-- Tornar Admin Geral -->
+            <form class="d-inline" method="post"
+                  action="{{ url_for('tornar_admin_geral', user_id=u.id) }}"
+                  onsubmit="return confirm('Tornar {{ u.nome }} ADMIN GERAL?')">
+              <button class="btn btn-outline-warning btn-sm"
+                      title="Tornar Admin Geral"
+                      {% if u.role == 'admin_geral' %}disabled{% endif %}>
+                <i class="fa-solid fa-crown"></i>
+              </button>
+            </form>
+
+            <!-- Tornar Admin Técnico -->
+            <form class="d-inline" method="post"
+                  action="{{ url_for('tornar_admin_tecnico', user_id=u.id) }}"
+                  onsubmit="return confirm('Tornar {{ u.nome }} ADMIN TÉCNICO?')">
+              <button class="btn btn-outline-primary btn-sm"
+                      title="Tornar Admin Técnico"
+                      {% if u.role == 'admin_tecnico' %}disabled{% endif %}>
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+              </button>
+            </form>
+
+            <!-- Remover Admin (volta a Usuário) -->
+            <form class="d-inline" method="post"
+                  action="{{ url_for('remover_admin', user_id=u.id) }}"
+                  onsubmit="return confirm('Remover permissões de administrador de {{ u.nome }}?')">
+              <button class="btn btn-outline-secondary btn-sm"
+                      title="Remover permissões de administrador"
+                      {% if u.role == 'user' %}disabled{% endif %}>
+                <i class="fa-solid fa-user-slash"></i>
+              </button>
+            </form>
+
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">Nenhum usuário encontrado.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,165 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<div class="admin-dashboard">
+
+  <!-- Cabeçalho do painel -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="m-0">Painel Administrativo</h3>
+      <div class="text-secondary small">
+        Visão geral do ConfereApp — usuários, mercados, produtos e preços.
+      </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('export_usuarios_csv') }}">
+        Exportar Usuários
+      </a>
+      <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('export_mercados_csv') }}">
+        Exportar Mercados
+      </a>
+      <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('export_produtos_csv') }}">
+        Exportar Produtos
+      </a>
+      <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('export_precos_csv_admin') }}">
+        Exportar Preços
+      </a>
+    </div>
+  </div>
+
+  <!-- KPIs principais -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="card shadow-sm border-0 h-100 kpi-card">
+        <div class="card-body">
+          <div class="fs-6 text-uppercase small kpi-label">Usuários</div>
+          <div class="fs-3 fw-bold kpi-value">{{ total_usuarios }}</div>
+          <div class="small">
+            <span class="badge rounded-pill bg-success">
+              Ativos: {{ ativos }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card shadow-sm border-0 h-100 kpi-card">
+        <div class="card-body">
+          <div class="fs-6 text-uppercase small kpi-label">Admins (Geral)</div>
+          <div class="fs-3 fw-bold kpi-value">{{ admins_gerais }}</div>
+          <div class="small text-secondary">
+            Técnicos: <b>{{ admins_tecnicos }}</b>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card shadow-sm border-0 h-100 kpi-card">
+        <div class="card-body">
+          <div class="fs-6 text-uppercase small kpi-label">Mercados</div>
+          <div class="fs-3 fw-bold kpi-value">{{ total_mercados }}</div>
+          <div class="small text-secondary">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card shadow-sm border-0 h-100 kpi-card">
+        <div class="card-body">
+          <div class="fs-6 text-uppercase small kpi-label">Produtos</div>
+          <div class="fs-3 fw-bold kpi-value">{{ total_produtos }}</div>
+          <div class="small text-secondary">
+            Preços cadastrados: <b>{{ total_precos }}</b>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Listas Top -->
+  <div class="row g-3">
+    <!-- Top produtos -->
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm border-0 h-100 list-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="m-0">Top produtos por nº de preços</h6>
+            <span class="badge bg-primary text-light">
+              últimos 10
+            </span>
+          </div>
+          <hr class="my-2">
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-2">
+              <thead class="table-light">
+                <tr>
+                  <th>Produto</th>
+                  <th class="text-end"># Preços</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for nome, n in top_produtos %}
+                <tr>
+                  <td>{{ nome }}</td>
+                  <td class="text-end">{{ n }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="2" class="text-secondary">Sem dados.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="small text-secondary">
+            Preços cadastrados nos últimos 7 dias:
+            <b>{{ precos_ultimos7 }}</b>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top mercados -->
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm border-0 h-100 list-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="m-0">Top mercados por nº de preços</h6>
+            <span class="badge bg-primary text-light">
+              últimos 10
+            </span>
+          </div>
+          <hr class="my-2">
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-2">
+              <thead class="table-light">
+                <tr>
+                  <th>Mercado</th>
+                  <th class="text-end"># Preços</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for nome, n in top_mercados %}
+                <tr>
+                  <td>{{ nome }}</td>
+                  <td class="text-end">{{ n }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="2" class="text-secondary">Sem dados.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="small text-secondary">
+            Use o menu “Preços” para cadastrar mais entradas e alimentar os relatórios.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

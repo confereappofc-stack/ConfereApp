@@ -1,0 +1,229 @@
+﻿{% extends "base.html" %} 
+{% block title %}Minha lista – ConfereApp{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+
+  <!-- Cabeçalho da página -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="mb-0">Minha lista</h1>
+      <p class="page-subtitle mb-0">
+        Monte sua lista de compras e depois compare os preços nos mercados da sua cidade.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- COLUNA ESQUERDA: Formulário -->
+    <div class="col-lg-5">
+      <div class="ca-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h3 class="h5 mb-0">Adicionar item à lista</h3>
+          <span class="ca-badge-mini">Passo 1</span>
+        </div>
+
+        {% if msg %}
+          <div class="alert alert-warning mb-3">{{ msg }}</div>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('lista') }}">
+          <div class="mb-3">
+            <label class="form-label" for="campoProduto">Produto</label>
+            <select id="campoProduto" name="produto_id" class="form-select" required>
+              <option value="">Selecione...</option>
+              {% for p in produtos %}
+                <option value="{{ p.id }}">{{ p.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="qtd">Quantidade</label>
+            <input type="number" step="1" min="1" id="qtd" name="qtd"
+                   class="form-control" value="1" inputmode="numeric">
+          </div>
+
+          {# Marca não é informada pelo cliente, mas continua existindo no banco
+             e aparece depois na COMPARAÇÃO como “marca vencedora” #}
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="campoUnidade">Unidade</label>
+              <select id="campoUnidade" name="unidade" class="form-select" required>
+                <option value="">Selecione o produto primeiro</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="campoTamanho">Tamanho</label>
+              <select id="campoTamanho" name="tamanho" class="form-select" required>
+                <option value="">Selecione o produto primeiro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <button type="submit" class="btn btn-confere">
+              + Adicionar à lista
+            </button>
+            <a href="{{ url_for('export_minha_lista_csv') }}" class="btn btn-outline-confere">
+              Exportar CSV
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- COLUNA DIREITA: Itens da lista -->
+    <div class="col-lg-7">
+      <div class="ca-card h-100 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div>
+            <h3 class="h5 mb-0">Itens da minha lista</h3>
+            <p class="page-subtitle mb-0">Esses são os produtos que serão comparados nos mercados.</p>
+          </div>
+          {% if itens %}
+            <span class="ca-badge-mini">
+              {{ itens|length }} item{{ itens|length > 1 and 's' or '' }}
+            </span>
+          {% endif %}
+        </div>
+
+        {% if itens %}
+          <div class="ca-list-wrapper flex-grow-1">
+
+            {% for it in itens %}
+              <div class="ca-list-item">
+                <div class="ca-list-main">
+                  <div class="ca-list-icon">
+                    🛒
+                  </div>
+                  <div>
+                    <div class="ca-list-title">
+                      {{ it.produto }}
+                    </div>
+                    <div class="ca-list-subtitle">
+                      {% if it.marca %}{{ it.marca }} • {% endif %}
+                      {% if it.unidade %}{{ it.unidade }}{% endif %}
+                      {% if it.tamanho %}
+                        {% if it.unidade %} • {% endif %}
+                        {{ "%.2f"|format(it.tamanho) }}
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ca-list-right">
+                  <span class="ca-chip">
+                    Qtd: {{ it.quantidade }}
+                  </span>
+
+                  <form method="post"
+                        action="{{ url_for('remover_item', item_id=it.item_id) }}"
+                        onsubmit="return confirm('Remover este item da lista?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                      &times;
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+
+          </div>
+
+          {# Botões de ações com a lista cheia #}
+          <div class="mt-3 d-flex flex-wrap gap-2 justify-content-end">
+            <form method="get" action="{{ url_for('comparar') }}">
+              <button type="submit" class="btn btn-confere">
+                <i class="fa-solid fa-scale-balanced"></i> Comparar preços
+              </button>
+            </form>
+
+            <form method="get" action="{{ url_for('export_minha_lista_csv') }}">
+              <button type="submit" class="btn btn-outline-confere">
+                Exportar CSV
+              </button>
+            </form>
+
+            <form action="{{ url_for('limpar_lista') }}" method="post"
+                  onsubmit="return confirm('Tem certeza que deseja limpar toda a lista?');">
+              <button type="submit" class="btn btn-outline-danger-confere">
+                Limpar lista
+              </button>
+            </form>
+          </div>
+
+        {% else %}
+          <div class="mt-3">
+            <p class="mb-1">Nenhum item na lista ainda.</p>
+            <p class="page-subtitle mb-0">
+              Comece escolhendo um produto ao lado e adicione à sua lista para comparar preços.
+            </p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{# --- JS para carregar unidades/tamanhos a partir dos preços cadastrados --- #}
+<script>
+  // Mapa produto_id -> {unidades: [...], tamanhos: [...]}
+  const produtoVariantes = {{ produto_variantes | tojson }};
+
+  const campoProduto  = document.getElementById('campoProduto');
+  const campoUnidade  = document.getElementById('campoUnidade');
+  const campoTamanho  = document.getElementById('campoTamanho');
+
+  function atualizarVariantes() {
+    const pid = campoProduto.value;
+    const dados = produtoVariantes[pid];
+
+    // limpa selects
+    campoUnidade.innerHTML = '';
+    campoTamanho.innerHTML = '';
+
+    if (!dados) {
+      campoUnidade.innerHTML = '<option value="">Sem variações cadastradas</option>';
+      campoTamanho.innerHTML = '<option value="">Sem variações cadastradas</option>';
+      return;
+    }
+
+    // Unidades
+    if (dados.unidades && dados.unidades.length > 0) {
+      campoUnidade.innerHTML = '<option value="">Selecione...</option>';
+      dados.unidades.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u;
+        opt.textContent = u;
+        campoUnidade.appendChild(opt);
+      });
+    } else {
+      campoUnidade.innerHTML = '<option value="">Sem unidades cadastradas</option>';
+    }
+
+    // Tamanhos
+    if (dados.tamanhos && dados.tamanhos.length > 0) {
+      campoTamanho.innerHTML = '<option value="">Selecione...</option>';
+      dados.tamanhos.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        campoTamanho.appendChild(opt);
+      });
+    } else {
+      campoTamanho.innerHTML = '<option value="">Sem tamanhos cadastradas</option>';
+    }
+  }
+
+  if (campoProduto) {
+    campoProduto.addEventListener('change', atualizarVariantes);
+    if (campoProduto.value) {
+      atualizarVariantes();
+    }
+  }
+</script>
+
+{% endblock %}

@@ -1,0 +1,234 @@
+﻿{% extends "base.html" %} 
+{% block content %}
+
+<!-- CABEÇALHO + BOTÕES DE AÇÃO -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="m-0">Gestão de Preços</h3>
+    <div class="small text-secondary">
+      Cadastre preços manualmente, importe via Excel, gerencie sua lista e compare mercados.
+    </div>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <!-- Nomes de endpoint alinhados com o app.py -->
+    <a href="{{ url_for('importar_excel') }}" class="btn btn-primary btn-sm">
+      <i class="fa-solid fa-file-excel"></i> Importar Excel
+    </a>
+
+    {# Esconde Minha Lista e Comparar para contas de empresa #}
+    {% if current_user and not current_user.is_empresa %}
+      <a href="{{ url_for('minha_lista') }}" class="btn btn-outline-light btn-sm">
+        <i class="fa-solid fa-list-check"></i> Minha Lista
+      </a>
+      <a href="{{ url_for('comparar') }}" class="btn btn-outline-info btn-sm">
+        <i class="fa-solid fa-scale-balanced"></i> Comparar
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- FORM CADASTRAR PREÇO -->
+  <div class="col-12 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header bg-dark text-white">
+        <i class="fa-solid fa-tag"></i> Cadastrar Preço
+      </div>
+      <div class="card-body">
+        {% if msg %}
+          <div class="alert alert-info">{{ msg }}</div>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('precos') }}" class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Produto *</label>
+            <select name="produto_id" class="form-select" required>
+              <option value="">— Selecione —</option>
+              {% for p in produtos %}
+                <option value="{{ p.id }}">{{ p.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          {% if mercados and mercados|length > 0 %}
+          <div class="col-12">
+            <label class="form-label">Mercado *</label>
+            <select name="mercado_id" class="form-select"
+                    {% if current_user and current_user.is_empresa %}disabled{% endif %}
+                    required>
+              {% for m in mercados %}
+                <option value="{{ m.id }}"
+                  {% if current_user and current_user.is_empresa %}selected{% endif %}>
+                  {{ m.nome }}
+                </option>
+              {% endfor %}
+            </select>
+            {% if current_user and current_user.is_empresa %}
+              <small class="text-muted">Sua conta de empresa já está vinculada ao seu Mercado.</small>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          <div class="col-12">
+            <label class="form-label">Marca *</label>
+            <input name="marca" list="marcas_sugestoes" class="form-control" placeholder="Ex.: Nestlé" required>
+            <datalist id="marcas_sugestoes">
+              {% for m in marcas_sugestoes %}
+                {% if m %}<option value="{{ m }}">{% endif %}
+              {% endfor %}
+            </datalist>
+          </div>
+
+          <div class="col-6">
+            <label class="form-label">Tamanho *</label>
+            <input name="tamanho" list="tamanhos_sugestoes" class="form-control" inputmode="decimal" placeholder="Ex.: 500 (gramas/ml/un)" required>
+            <datalist id="tamanhos_sugestoes">
+              {% for t in tamanhos_sugestoes %}
+                {% if t is not none %}
+                  <option value="{{ ('%.0f' % t) if t.is_integer() else ('%.2f' % t) }}">
+                {% endif %}
+              {% endfor %}
+            </datalist>
+            <small class="text-muted">Número puro (ex.: 500). A unidade vai no campo ao lado.</small>
+          </div>
+
+          <div class="col-6">
+            <label class="form-label">Unidade *</label>
+            <input name="unidade" list="unidades_sugestoes" class="form-control" placeholder="Ex.: g, ml, kg, L, un" required>
+            <datalist id="unidades_sugestoes">
+              {% for u in unidades_sugestoes %}
+                {% if u %}<option value="{{ u }}">{% endif %}
+              {% endfor %}
+            </datalist>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Preço (R$) *</label>
+            <input name="preco" class="form-control" inputmode="decimal" placeholder="Ex.: 9,99" required>
+            <small class="text-muted">Aceita vírgula ou ponto.</small>
+          </div>
+
+          <div class="col-12 d-grid">
+            <button class="btn btn-dark">
+              <i class="fa-solid fa-floppy-disk"></i> Salvar Preço
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTAGEM + FILTROS -->
+  <div class="col-12 col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-header bg-secondary text-white">
+        <i class="fa-solid fa-list"></i> Últimos Preços Cadastrados
+      </div>
+      <div class="card-body">
+        <!-- Filtros client-side -->
+        <div class="row g-2 align-items-end mb-3">
+          <div class="col-12 col-md-4">
+            <label class="form-label mb-1">Filtrar por Produto</label>
+            <input id="filtroProduto" class="form-control" placeholder="Digite parte do nome">
+          </div>
+          <div class="col-6 col-md-4">
+            <label class="form-label mb-1">Marca</label>
+            <input id="filtroMarca" class="form-control" placeholder="Ex.: Qualquer">
+          </div>
+          <div class="col-6 col-md-4">
+            <label class="form-label mb-1">Unidade</label>
+            <input id="filtroUnidade" class="form-control" placeholder="Ex.: kg, g, L, ml, un">
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm align-middle" id="tabelaPrecos">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Marca</th>
+                <th class="text-end">Tamanho</th>
+                <th>Unidade</th>
+                <th>Mercado</th>
+                <th class="text-end">Preço (R$)</th>
+                <th class="text-nowrap">Criado em</th>
+                <th class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in lista %}
+              <tr>
+                <td>{{ r.produto }}</td>
+                <td>{{ r.marca }}</td>
+                <td class="text-end">
+                  {% if r.tamanho is not none %}
+                    {% if r.tamanho.is_integer() %}
+                      {{ '%.0f'|format(r.tamanho) }}
+                    {% else %}
+                      {{ '%.2f'|format(r.tamanho) }}
+                    {% endif %}
+                  {% endif %}
+                </td>
+                <td>{{ r.unidade }}</td>
+                <td>{{ r.mercado }}</td>
+                <td class="text-end">{{ '%.2f'|format(r.preco) }}</td>
+                <td class="text-nowrap">{{ r.criado_em.strftime('%d/%m/%Y %H:%M') if r.criado_em else '' }}</td>
+                <td class="text-center">
+                  <form action="{{ url_for('excluir_preco', preco_id=r.id) }}" method="post" onsubmit="return confirm('Excluir este preço?')">
+                    <button class="btn btn-sm btn-outline-danger">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Filtros simples na tabela (Produto/Marca/Unidade)
+  (function(){
+    const filtroProduto = document.getElementById('filtroProduto');
+    const filtroMarca   = document.getElementById('filtroMarca');
+    const filtroUnidade = document.getElementById('filtroUnidade');
+    const tbody = document.querySelector('#tabelaPrecos tbody');
+
+    function normaliza(s){
+      return (s || '').toString().toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g,'');
+    }
+
+    function applyFilters(){
+      const p = normaliza(filtroProduto.value);
+      const m = normaliza(filtroMarca.value);
+      const u = normaliza(filtroUnidade.value);
+
+      for (const tr of tbody.querySelectorAll('tr')) {
+        const tds = tr.querySelectorAll('td');
+        const prod   = normaliza(tds[0]?.textContent);
+        const marca  = normaliza(tds[1]?.textContent);
+        const unidade= normaliza(tds[3]?.textContent);
+
+        const ok =
+          (p === '' || prod.includes(p)) &&
+          (m === '' || marca.includes(m)) &&
+          (u === '' || unidade.includes(u));
+
+        tr.style.display = ok ? '' : 'none';
+      }
+    }
+
+    filtroProduto.addEventListener('input', applyFilters);
+    filtroMarca.addEventListener('input', applyFilters);
+    filtroUnidade.addEventListener('input', applyFilters);
+  })();
+</script>
+
+{% endblock %}

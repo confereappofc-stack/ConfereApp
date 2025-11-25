@@ -1,0 +1,351 @@
+﻿{% extends "base.html" %} 
+{% block title %}Comparar preços – ConfereApp{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+
+  <!-- Cabeçalho -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="mb-0">Comparar preços</h1>
+      <p class="page-subtitle mb-0">
+        Descubra em quais mercados sua lista de compras fica mais barata.
+      </p>
+    </div>
+
+    <a href="{{ url_for('historico_comparacoes') }}"
+       class="btn btn-outline-confere btn-sm">
+      Ver histórico de comparações
+    </a>
+  </div>
+
+  <!-- Filtros / Localização -->
+  <div class="row g-4 mb-3">
+    <div class="col-lg-7">
+      <div class="ca-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h3 class="h5 mb-0">Definir localização</h3>
+          <span class="ca-badge-mini">Passo 2</span>
+        </div>
+        <p class="page-subtitle">
+          Use a sua localização ou informe manualmente para ver os mercados mais próximos.
+        </p>
+
+        <form method="get" action="{{ url_for('comparar') }}" class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label" for="lat">Latitude</label>
+            <input type="text" class="form-control" id="lat" name="lat"
+                   value="{{ lat or '' }}">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label" for="lng">Longitude</label>
+            <input type="text" class="form-control" id="lng" name="lng"
+                   value="{{ lng or '' }}">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label" for="raio_km">Raio (km)</label>
+            <input type="number" step="0.5" min="1" class="form-control"
+                   id="raio_km" name="raio_km"
+                   value="{{ raio_km or 10 }}">
+          </div>
+
+          <div class="col-12 d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2">
+            <button type="button" class="btn btn-outline-confere"
+                    onclick="pegarLocalizacao()">
+              Usar minha localização
+            </button>
+
+            <button type="submit" class="btn btn-confere">
+              Atualizar comparação
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Resumo / Exportações -->
+    <div class="col-lg-5">
+      {% if economia is not none or best_single_total or best_split_groups %}
+      <div class="ca-card h-100 d-flex flex-column justify-content-between">
+        <div>
+          <h3 class="h5 mb-2">Resumo da economia</h3>
+
+          {% if economia is not none %}
+            <div class="ca-saving-widget mb-3">
+              <div class="ca-saving-value">
+                {% if economia_modo == 'igual' %}
+                  ≈
+                {% else %}
+                  R$
+                {% endif %}
+                {{ "%.2f"|format(economia) if economia_modo != 'igual' else '' }}
+              </div>
+              <div class="ca-saving-text">
+                {% if economia_modo == 'single' %}
+                  Você economiza comprando tudo em
+                  <strong>um único mercado</strong>.
+                {% elif economia_modo == 'split' %}
+                  Você economiza fazendo compras fracionadas em
+                  <strong>até 3 mercados</strong>.
+                {% elif economia_modo == 'igual' %}
+                  Os dois cenários têm praticamente o
+                  <strong>mesmo custo</strong>.
+                {% endif %}
+              </div>
+            </div>
+          {% else %}
+            <p class="page-subtitle mb-3">
+              Preencha a localização ao lado para ver quanto você pode economizar.
+            </p>
+          {% endif %}
+        </div>
+
+        {% if best_single_total or best_split_groups %}
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            {% if best_single_total %}
+              <a href="/exportar_unico_pdf?lat={{ lat }}&lng={{ lng }}&raio_km={{ raio_km }}"
+                 class="btn btn-confere flex-grow-1">
+                PDF – Mercado único
+              </a>
+            {% endif %}
+            {% if best_split_groups %}
+              <a href="/exportar_fracionado_pdf?lat={{ lat }}&lng={{ lng }}&raio_km={{ raio_km }}"
+                 class="btn btn-outline-confere flex-grow-1">
+                PDF – Top 3 fracionado
+              </a>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if aviso %}
+    <div class="alert alert-info mb-4">{{ aviso }}</div>
+  {% endif %}
+
+  {# ==========================
+     MELHOR MERCADO ÚNICO
+     ========================== #}
+  {% if best_single_total %}
+  <div class="ca-card border-success mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div>
+        <h3 class="h5 mb-0">Melhor mercado único</h3>
+        <p class="page-subtitle mb-0">
+          Opção mais barata comprando tudo em um só lugar.
+        </p>
+      </div>
+      <span class="ca-badge-mini ca-badge-success">Mercado único</span>
+    </div>
+
+    {% if best_single_mercado %}
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+        <div>
+          <h5 class="mb-1">{{ best_single_mercado.nome }}</h5>
+          <p class="mb-0 page-subtitle">
+            {{ best_single_mercado.cidade or '-' }} •
+            {{ best_single_mercado.bairro or '-' }}
+          </p>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2 mt-2 mt-md-0">
+          {% if best_single_mercado._dist_km is not none %}
+            <span class="ca-chip">
+              ~ {{ "%.2f"|format(best_single_mercado._dist_km) }} km
+            </span>
+          {% endif %}
+
+          {% if best_single_mercado.lat and best_single_mercado.lng %}
+            <a href="https://www.google.com/maps/dir/?api=1&destination={{ best_single_mercado.lat }},{{ best_single_mercado.lng }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="ca-map-btn">
+              Maps
+            </a>
+            <a href="https://www.waze.com/ul?ll={{ best_single_mercado.lat }},{{ best_single_mercado.lng }}&navigate=yes"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="ca-map-btn">
+              Waze
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+      <span class="page-subtitle">
+        Itens nesta loja: <strong>{{ best_single_map|length }}</strong>
+      </span>
+      <span class="fs-5">
+        Total estimado:
+        <strong class="text-success">
+          R$ {{ "%.2f"|format(best_single_total) }}
+        </strong>
+      </span>
+    </div>
+
+    <div class="ca-table-wrapper">
+      <table class="table table-sm table-striped align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Marca</th>
+            <th>Unidade</th>
+            <th>Tam.</th>
+            <th class="text-end">Qtd</th>
+            <th class="text-end">Preço</th>
+            <th class="text-end">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pid, info in best_single_map.items() %}
+            <tr>
+              <td>{{ nomes_produtos[pid] }}</td>
+              <td>{{ info.marca or '' }}</td>
+              <td>{{ info.unidade or '' }}</td>
+              <td>
+                {% if info.tamanho %}
+                  {{ "%.2f"|format(info.tamanho) }}
+                {% endif %}
+              </td>
+              <td class="text-end">{{ "%.2f"|format(info.qtd) }}</td>
+              <td class="text-end">R$ {{ "%.2f"|format(info.preco) }}</td>
+              <td class="text-end">
+                R$ {{ "%.2f"|format(info.qtd * info.preco) }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  {% endif %}
+
+  {# ==========================
+     TOP 3 FRACIONADO
+     ========================== #}
+  {% if best_split_groups %}
+  <div class="ca-card mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div>
+        <h3 class="h5 mb-0">Top 3 fracionado</h3>
+        <p class="page-subtitle mb-0">
+          Melhor combinação de até três mercados diferentes.
+        </p>
+      </div>
+      <span class="ca-badge-mini">Compras fracionadas</span>
+    </div>
+
+    {% if best_split_total %}
+      <p class="fs-6 mb-3">
+        Total fracionado:
+        <strong>R$ {{ "%.2f"|format(best_split_total) }}</strong>
+      </p>
+    {% endif %}
+
+    {% for grupo in best_split_groups %}
+      <div class="ca-subcard mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+          <div>
+            <strong>{{ grupo.mercado.nome }}</strong><br>
+            <span class="page-subtitle">
+              {{ grupo.mercado.cidade or '-' }} • {{ grupo.mercado.bairro or '-' }}
+            </span>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            {% if grupo.mercado._dist_km is not none %}
+              <span class="ca-chip">
+                ~ {{ "%.2f"|format(grupo.mercado._dist_km) }} km
+              </span>
+            {% endif %}
+
+            {% if grupo.mercado.lat and grupo.mercado.lng %}
+              <a href="https://www.google.com/maps/dir/?api=1&destination={{ grupo.mercado.lat }},{{ grupo.mercado.lng }}"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 class="ca-map-btn">
+                Maps
+              </a>
+              <a href="https://www.waze.com/ul?ll={{ grupo.mercado.lat }},{{ grupo.mercado.lng }}&navigate=yes"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 class="ca-map-btn">
+                Waze
+              </a>
+            {% endif %}
+
+            <span class="ca-chip ca-chip-strong">
+              {{ grupo.qtd_itens }} item{{ grupo.qtd_itens > 1 and 's' or '' }}
+            </span>
+            <span class="fs-6">
+              Subtotal:
+              <strong>R$ {{ "%.2f"|format(grupo.subtotal) }}</strong>
+            </span>
+          </div>
+        </div>
+
+        <div class="ca-table-wrapper">
+          <table class="table table-sm table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Marca</th>
+                <th>Unidade</th>
+                <th>Tam.</th>
+                <th class="text-end">Qtd</th>
+                <th class="text-end">Preço</th>
+                <th class="text-end">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for it in grupo.itens %}
+                <tr>
+                  <td>{{ it.nome }}</td>
+                  <td>{{ it.marca or '' }}</td>
+                  <td>{{ it.unidade or '' }}</td>
+                  <td>
+                    {% if it.tamanho %}
+                      {{ "%.2f"|format(it.tamanho) }}
+                    {% endif %}
+                  </td>
+                  <td class="text-end">{{ "%.2f"|format(it.qtd) }}</td>
+                  <td class="text-end">R$ {{ "%.2f"|format(it.preco) }}</td>
+                  <td class="text-end">R$ {{ "%.2f"|format(it.total_linha) }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function pegarLocalizacao() {
+  if (!navigator.geolocation) {
+    alert("Seu navegador não suporta geolocalização.");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    document.getElementById('lat').value = pos.coords.latitude.toFixed(6);
+    document.getElementById('lng').value = pos.coords.longitude.toFixed(6);
+  }, function(err) {
+    alert("Não foi possível obter sua localização.");
+    console.error(err);
+  });
+}
+</script>
+{% endblock %}

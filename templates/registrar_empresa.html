@@ -1,0 +1,160 @@
+﻿{% extends "base.html" %}
+{% block title %}Registrar Empresa – ConfereApp{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+  <h2 class="mb-4">Cadastro de Empresa</h2>
+
+  {% if erro %}
+  <div class="alert alert-danger">{{ erro }}</div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-lg-8 col-xl-7">
+
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+          <strong>Informações da empresa</strong>
+        </div>
+
+        <div class="card-body">
+
+          <form method="POST" action="{{ url_for('registrar_empresa') }}">
+
+            <!-- NOME DA EMPRESA -->
+            <div class="mb-3">
+              <label class="form-label">Nome da empresa *</label>
+              <input type="text" 
+                     name="empresa_nome" 
+                     class="form-control"
+                     required
+                     value="{{ request.form.get('empresa_nome', '') }}"
+                     placeholder="Ex.: Supermercado ConfereApp">
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">CNPJ *</label>
+                <input type="text" 
+                       name="cnpj" 
+                       class="form-control"
+                       required
+                       value="{{ request.form.get('cnpj', '') }}"
+                       placeholder="00.000.000/0000-00">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">E-mail *</label>
+                <input type="email" 
+                       name="email" 
+                       class="form-control"
+                       required
+                       value="{{ request.form.get('email', '') }}"
+                       placeholder="empresa@supermercado.com">
+              </div>
+            </div>
+
+            <!-- SENHAS -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Senha *</label>
+                <input type="password" 
+                       name="senha" 
+                       class="form-control"
+                       required
+                       minlength="6">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Confirmar senha *</label>
+                <input type="password" 
+                       name="conf" 
+                       class="form-control"
+                       required
+                       minlength="6">
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- ENDEREÇO -->
+            <h5 class="mb-3">Endereço principal</h5>
+
+            <div class="row">
+              <div class="col-md-9 mb-3">
+                <label class="form-label">Logradouro</label>
+                <input type="text" 
+                       name="logradouro" 
+                       class="form-control"
+                       value="{{ request.form.get('logradouro', '') }}"
+                       placeholder="Rua, avenida, etc.">
+              </div>
+
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Número</label>
+                <input type="text" 
+                       name="numero" 
+                       class="form-control"
+                       value="{{ request.form.get('numero', '') }}">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Bairro</label>
+                <input type="text" 
+                       name="bairro" 
+                       class="form-control"
+                       value="{{ request.form.get('bairro', '') }}"
+                       placeholder="Centro">
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Cidade *</label>
+                <input type="text" 
+                       name="cidade" 
+                       class="form-control"
+                       required
+                       value="{{ request.form.get('cidade', '') }}"
+                       placeholder="Toritama">
+              </div>
+
+              <div class="col-md-2 mb-3">
+                <label class="form-label">UF *</label>
+                <input type="text" 
+                       name="uf" 
+                       class="form-control text-uppercase"
+                       maxlength="2"
+                       required
+                       value="{{ request.form.get('uf', '') }}"
+                       placeholder="PE">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">CEP</label>
+                <input type="text" 
+                       name="cep" 
+                       class="form-control"
+                       value="{{ request.form.get('cep', '') }}"
+                       placeholder="00000-000">
+              </div>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-between">
+              <a href="{{ url_for('login') }}" class="btn btn-outline-secondary">
+                Voltar
+              </a>
+              <button class="btn btn-success">Registrar empresa</button>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,62 @@
+﻿{% extends "base.html" %}
+{% block title %}Histórico de comparações – ConfereApp{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Histórico de comparações</h2>
+
+{% if historicos and historicos|length > 0 %}
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th class="text-end">Mercado único (R$)</th>
+          <th class="text-end">Top 3 fracionado (R$)</th>
+          <th class="text-end">Economia (R$)</th>
+          <th class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in historicos %}
+        <tr>
+          <td>{{ h.criado_em.strftime('%d/%m/%Y %H:%M') if h.criado_em else '-' }}</td>
+          <td class="text-end">
+            {% if h.best_single_total is not none %}
+              {{ "%.2f"|format(h.best_single_total) }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td class="text-end">
+            {% if h.best_split_total is not none %}
+              {{ "%.2f"|format(h.best_split_total) }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td class="text-end">
+            {% if h.economia is not none %}
+              {{ "%.2f"|format(h.economia) }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td class="text-center">
+            <a href="{{ url_for('comparar', lat=h.lat, lng=h.lng, raio_km=h.raio_km) }}"
+               class="btn btn-sm btn-outline-primary">
+              Repetir
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p>Nenhuma comparação registrada ainda.</p>
+{% endif %}
+
+<a href="{{ url_for('comparar') }}" class="btn btn-outline-secondary mt-3">
+  Voltar para comparação
+</a>
+{% endblock %}

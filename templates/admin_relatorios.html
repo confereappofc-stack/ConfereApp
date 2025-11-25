@@ -1,0 +1,150 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-3">Relatórios</h2>
+
+<form class="row gy-2 gx-2 align-items-end mb-4" method="get">
+  <div class="col-auto">
+    <label class="form-label">Período</label>
+    <div class="btn-group d-block">
+      <a class="btn btn-sm {{ 'btn-primary' if period=='7d' else 'btn-outline-primary' }}" href="{{ url_for('admin_relatorios', period='7d', uf=uf, cidade=cidade, produto_id=produto_id) }}">7 dias</a>
+      <a class="btn btn-sm {{ 'btn-primary' if period=='30d' else 'btn-outline-primary' }}" href="{{ url_for('admin_relatorios', period='30d', uf=uf, cidade=cidade, produto_id=produto_id) }}">30 dias</a>
+      <a class="btn btn-sm {{ 'btn-primary' if period=='90d' else 'btn-outline-primary' }}" href="{{ url_for('admin_relatorios', period='90d', uf=uf, cidade=cidade, produto_id=produto_id) }}">90 dias</a>
+      <a class="btn btn-sm {{ 'btn-primary' if period=='all' else 'btn-outline-primary' }}" href="{{ url_for('admin_relatorios', period='all', uf=uf, cidade=cidade, produto_id=produto_id) }}">Tudo</a>
+    </div>
+  </div>
+
+  <div class="col-auto">
+    <label class="form-label">UF</label>
+    <select class="form-select form-select-sm" name="uf" onchange="this.form.submit()">
+      <option value="">Todas</option>
+      {% for u in ufs %}
+        <option value="{{ u }}" {{ 'selected' if uf==u else '' }}>{{ u }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-auto">
+    <label class="form-label">Cidade</label>
+    <select class="form-select form-select-sm" name="cidade" onchange="this.form.submit()">
+      <option value="">Todas</option>
+      {% for (u,c) in cidades_all %}
+        {% if not uf or uf==u %}
+          <option value="{{ c }}" {{ 'selected' if cidade==c else '' }}>{{ c }}</option>
+        {% endif %}
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-auto">
+    <label class="form-label">Produto (para o gráfico por cidade)</label>
+    <select class="form-select form-select-sm" name="produto_id" onchange="this.form.submit()">
+      <option value="">(Selecionar automaticamente)</option>
+      {% for p in produtos_all %}
+        <option value="{{ p.id }}" {{ 'selected' if produto_id==p.id else '' }}>{{ p.nome }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</form>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Preço médio por cidade — {{ produto_nome_sel or 'Produto selecionado' }}</h5>
+        <canvas id="chartMedias"></canvas>
+        <div class="mt-2">
+          <a class="btn btn-sm btn-outline-secondary"
+             href="{{ url_for('rel_export_precos_por_cidade', period=period, uf=uf, cidade=cidade, produto_id=produto_id) }}">
+            Exportar CSV
+          </a>
+        </div>
+        {% if not medias_por_cidade %}
+          <div class="text-muted mt-2">Sem dados para este recorte.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Volume de preços por cidade (atualizações)</h5>
+        <canvas id="chartVolume"></canvas>
+        <div class="mt-2">
+          <a class="btn btn-sm btn-outline-secondary"
+             href="{{ url_for('rel_export_volume_precos_por_cidade', period=period, uf=uf, cidade=cidade) }}">
+            Exportar CSV
+          </a>
+        </div>
+        {% if not vol_por_cidade %}
+          <div class="text-muted mt-2">Sem dados para este recorte.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Top 15 produtos mais adicionados à lista (GLOBAL)</h5>
+        <canvas id="chartTop"></canvas>
+        <div class="mt-2">
+          <a class="btn btn-sm btn-outline-secondary"
+             href="{{ url_for('rel_export_produtos_populares', period=period) }}">
+            Exportar CSV
+          </a>
+        </div>
+        {% if not top_produtos %}
+          <div class="text-muted mt-2">Sem dados no período.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Top 15 produtos menos adicionados à lista (GLOBAL)</h5>
+        <canvas id="chartLow"></canvas>
+        {% if not low_produtos %}
+          <div class="text-muted mt-2">Sem dados no período.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const mediasLabels = {{ (medias_por_cidade.keys()|list)|tojson }};
+const mediasData   = {{ (medias_por_cidade.values()|list)|tojson }};
+
+const volLabels    = {{ vol_labels|tojson }};
+const volData      = {{ vol_data|tojson }};
+
+const topLabels    = {{ top_labels|tojson }};
+const topData      = {{ top_data|tojson }};
+
+const lowLabels    = {{ low_labels|tojson }};
+const lowData      = {{ low_data|tojson }};
+
+function mkBar(id, labels, data, horiz=false) {
+  const ctx = document.getElementById(id).getContext('2d');
+  return new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: '', data }] },
+    options: {
+      indexAxis: horiz ? 'y' : 'x',
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+if (mediasLabels.length) mkBar('chartMedias', mediasLabels, mediasData, false);
+if (volLabels.length)    mkBar('chartVolume', volLabels, volData, true);
+if (topLabels.length)    mkBar('chartTop', topLabels, topData, true);
+if (lowLabels.length)    mkBar('chartLow', lowLabels, lowData, true);
+</script>
+{% endblock %}
