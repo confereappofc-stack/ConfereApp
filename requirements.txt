@@ -1,6 +1,7 @@
 Flask
 Flask-SQLAlchemy
+Flask-Migrate
 pandas
+requests
 gunicorn
 python-dotenv
-requests
