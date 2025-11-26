@@ -1834,9 +1834,10 @@ def whoami():
     }
 
 
-@app.route('/')
-def home():
-    return 'ConfereApp rodando com sucesso!'
+@app.route("/")
+def index():
+    return redirect(url_for("login"))
+
 
 @app.route('/admin/routes')
 def admin_routes():
