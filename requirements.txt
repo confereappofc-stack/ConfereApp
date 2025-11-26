@@ -3,3 +3,4 @@ Flask-SQLAlchemy
 pandas
 gunicorn
 python-dotenv
+requests
