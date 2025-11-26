@@ -47,18 +47,6 @@ LOGO_PATH = os.path.join('static', 'img', 'confereapp_logo.png')
 # -------------------------
 # IMPORTS DO REPORTLAB (ÚNICOS PERMITIDOS)
 # -------------------------
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.lib.units import cm
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Paragraph,
-    Spacer,
-    Table,
-    TableStyle,
-    Image,
-)
 
 
 def gerar_pdf(html):
@@ -67,8 +55,7 @@ def gerar_pdf(html):
     response.headers["Content-Disposition"] = "attachment; filename=relatorio.pdf"
 
     pisa.CreatePDF(html, dest=response)
-    return response
-
+    return "PDF temporariamente indisponível"
 
 def _make_pdf_table(data):
     """Cria uma tabela estilizada (modelo B) para o PDF."""
@@ -3315,9 +3302,8 @@ def _build_comparar_context(lat, lng, raio_km, uid):
 
 from io import BytesIO
 from datetime import datetime
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import cm
+
+
 from flask import send_file
 
 def _calcular_comparacao(lat, lng, raio_km):
@@ -3876,9 +3862,7 @@ def comparar(make_internal_call=False, _lat=None, _lng=None, _raio_km=None):
 # ============================================================
 # PDF – Mercado Único
 # ============================================================
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import cm
+
 
 @app.route('/comparar/pdf-unico', methods=['GET'])
 @login_required
@@ -4550,11 +4534,7 @@ def not_found(e):
 def server_error(e):
     return render_template('500.html'), 500
 
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import cm
+
 
 def _build_table(data):
     """Cria tabela estilizada."""
