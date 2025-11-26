@@ -5,6 +5,10 @@
   <title>{% block title %}ConfereApp{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- PWA -->
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <meta name="theme-color" content="#0A8F5C">
+
   <!-- Bootstrap 5 (CDN) -->
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -34,10 +38,7 @@
       <div class="collapse navbar-collapse" id="mainNavbar">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-          {# aqui usamos apenas "current_user", não .is_authenticated #}
           {% if current_user %}
-
-            {# CLIENTE ou ADMIN (Master / Técnico): monta lista e compara #}
             {% if current_user.is_cliente or current_user.is_admin_any %}
               <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('lista') }}">Minha lista</a>
@@ -47,7 +48,6 @@
               </li>
             {% endif %}
 
-            {# EMPRESA (mercado): gerencia apenas seus produtos, preços e mercado #}
             {% if current_user.is_empresa and not current_user.is_admin_any %}
               <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('produtos') }}">Produtos</a>
@@ -60,7 +60,6 @@
               </li>
             {% endif %}
 
-            {# ADMIN MASTER / ADMIN QUALQUER: menu Admin completo #}
             {% if current_user.is_admin_any %}
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="adminDrop" role="button" data-bs-toggle="dropdown">
@@ -77,7 +76,6 @@
                 </ul>
               </li>
             {% endif %}
-
           {% endif %}
         </ul>
 
@@ -132,6 +130,13 @@
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
     crossorigin="anonymous"></script>
+
+  <!-- Service Worker PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register("{{ url_for('static', filename='service-worker.js') }}");
+    }
+  </script>
 
   {% block extra_js %}{% endblock %}
 </body>
