@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 from math import radians, cos, ceil, sin, asin, sqrt
 import unicodedata
-import pandas as pd
+
 
 # -----------------------------------------
 # Fallback de coordenadas por cidade
