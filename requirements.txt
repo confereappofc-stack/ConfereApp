@@ -1,6 +1,11 @@
 Flask==2.2.5
 Flask_SQLAlchemy==3.0.5
-Werkzeug==2.2.3
-requests==2.31.0
-python-dotenv==1.0.0
-gunicorn==21.2.0
+pandas==2.0.3
+gunicorn
+python-dotenv
+requests
+Werkzeug==2.3.7
+itsdangerous==2.1.2
+Jinja2==3.1.2
+SQLAlchemy==2.0.44
+reportlab==3.6.1
