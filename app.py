@@ -4475,6 +4475,10 @@ def historico_comparacoes():
 def admin_seed():
     return seed_admin(return_str=True), 200
 
+@app.route("/instalar")
+def instalar():
+    return render_template("instalar.html")
+
 @app.route('/admin/users')
 def admin_users():
     users = Usuario.query.order_by(Usuario.id).all()
