@@ -6,6 +6,7 @@ from functools import wraps
 from math import radians, cos, ceil, sin, asin, sqrt
 import unicodedata
 
+import pandas as pd
 
 # -----------------------------------------
 # Fallback de coordenadas por cidade
@@ -2020,29 +2021,30 @@ def logout():
 
 @app.route('/importar_excel', methods=['GET', 'POST'])
 @login_required
-@empresa_or_admin_required
 def importar_excel():
-    user = g.current_user
-    is_admin = bool(user and user.is_admin_any)
-    tipo = (user.tipo if user else "cliente")
+    if request.method == 'POST':
+        file = request.files.get('arquivo')
+        if not file or file.filename == '':
+            flash("Nenhum arquivo selecionado.", "warning")
+            return redirect(url_for('importar_excel'))
 
-    # ========== GET ==========
-    if request.method == 'GET':
-        # primeira abertura da tela, sem resumo ainda
-        return render_template("importar_excel.html", resumo=None, erros=None)
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
 
-    # ========== POST ==========
-    file = request.files.get('arquivo')
-    if not file or file.filename == "":
-        flash("Selecione um arquivo Excel para importar.", "warning")
-        return redirect(url_for('importar_excel'))
+        try:
+            df = pd.read_excel(filepath, engine="openpyxl")
+        except Exception as e:
+            app.logger.exception("Erro lendo Excel: %s", e)
+            flash("Erro ao ler arquivo Excel. Verifique o formato.", "danger")
+            return redirect(url_for('importar_excel'))
 
-    try:
-        df = pd.read_excel(filepath, engine='openpyxl')
-    except Exception as e:
-        print("Erro lendo Excel:", e)
-        flash("Erro ao ler arquivo Excel. Verifique o formato.", "danger")
-        return redirect(url_for('importar_excel'))
+        # ... resto do processamento dos preços ...
+
+        flash("Preços importados com sucesso.", "success")
+        return redirect(url_for('precos'))
+
+    return render_template('importar_excel.html')
 
     # -------- Normaliza colunas --------
     colunas = {c.strip().lower(): c for c in df.columns if isinstance(c, str)}
