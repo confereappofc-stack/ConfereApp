@@ -2092,6 +2092,7 @@ def importar_excel():
     # -------- 1) Mercado alvo --------
     mercado_fixo = None
     mercados_cache = {}
+    mercados_limpos = set()  # guarda mercados que já tiveram preços apagados
 
     if getattr(user, "is_empresa", False) and not is_admin:
         # Empresa: sempre importa para o próprio mercado
@@ -2173,6 +2174,11 @@ def importar_excel():
                         db.session.add(mercado)
                         db.session.flush()
                     mercados_cache[nome_merc] = mercado
+
+            # -------- LIMPAR PREÇOS ANTIGOS DO MERCADO (apenas 1 vez) --------
+            if mercado.id not in mercados_limpos:
+                Preco.query.filter_by(mercado_id=mercado.id).delete()
+                mercados_limpos.add(mercado.id)
 
             # -------- 2.2 - Resolve o PRODUTO --------
             try:
