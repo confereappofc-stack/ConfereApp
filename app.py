@@ -1992,6 +1992,17 @@ def login():
         session['user_nome']  = u.nome
         session['user_email'] = u.email
 
+        # 🔴 limpa qualquer lista antiga desse usuário
+        try:
+            ListaItem.query.filter_by(user_id=u.id).delete()
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+        # garante que nada de lista fique na sessão
+        session.pop('lista', None)
+        session.pop('minha_lista_id', None)
+
         nxt = request.args.get('next')
         if not nxt or not nxt.startswith('/'):
             nxt = _perfil_default_route(u)
@@ -4114,9 +4125,18 @@ def minha_lista():
 @app.route('/minha-lista/limpar', methods=['POST'])
 @login_required
 def limpar_minha_lista():
-    uid = session['user_id']
-    ListaItem.query.filter_by(user_id=uid).delete()
-    db.session.commit()
+    # ID do usuário logado
+    uid = session.get('user_id')
+
+    # Remove todos os itens de lista desse usuário no banco
+    if uid is not None:
+        ListaItem.query.filter_by(user_id=uid).delete()
+        db.session.commit()
+
+    # Garante que qualquer coisa na sessão relacionada à lista seja apagada
+    session.pop('lista', None)
+    session.pop('minha_lista_id', None)
+
     flash('Sua lista foi limpa.', 'success')
     return redirect(url_for('minha_lista'))
 
