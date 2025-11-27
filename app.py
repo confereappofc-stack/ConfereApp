@@ -4564,128 +4564,12 @@ def _build_table(data):
 @app.route("/exportar_unico_pdf")
 @login_required
 def exportar_unico_pdf():
-    lat = _to_float(request.args.get("lat"))
-    lng = _to_float(request.args.get("lng"))
-    raio_km = _to_float(request.args.get("raio_km")) or 10.0
-
-    # pega todos os dados já calculados pelo comparar()
-    result = comparar(make_internal_call=True, _lat=lat, _lng=lng, _raio_km=raio_km)
-
-    best_single_total   = result["best_single_total"]
-    best_single_mercado = result["best_single_mercado"]
-    best_single_map     = result["best_single_map"]
-    nomes_produtos      = result["nomes_produtos"]
-
-    # se não tiver resultado, devolve um PDF simples avisando
-    if not best_single_total or not best_single_mercado:
-        buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4)
-        styles = getSampleStyleSheet()
-        story = [Paragraph("Nenhum resultado para mercado único.", styles["Title"])]
-        doc.build(story)
-        buffer.seek(0)
-        return send_file(
-            buffer,
-            as_attachment=True,
-            download_name="mercado_unico.pdf",
-            mimetype="application/pdf",
-        )
-
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        leftMargin=2*cm,
-        rightMargin=2*cm,
-        topMargin=2*cm,
-        bottomMargin=2*cm,
-        title="ConfereApp - Mercado Único",
+    flash(
+        "📄 Função disponível apenas no plano Premium.<br>"
+        "Em breve você poderá gerar PDFs completos para impressão!",
+        "info"
     )
-
-    styles = getSampleStyleSheet()
-    story = []
-
-    # LOGO + título
-    try:
-        logo = Image(LOGO_PATH, width=4*cm, height=4*cm)
-        logo.hAlign = "LEFT"
-        story.append(logo)
-    except Exception:
-        # se não achar a logo, só segue sem ela
-        pass
-
-    story.append(Paragraph("<b>ConfereApp - Melhor mercado único</b>", styles["Title"]))
-    story.append(Spacer(1, 0.3*cm))
-
-    # Dados do mercado
-    txt_mercado = (
-        f"<b>Mercado:</b> {best_single_mercado.nome}<br/>"
-        f"<b>Cidade:</b> {best_single_mercado.cidade or '-'}<br/>"
-        f"<b>Bairro:</b> {best_single_mercado.bairro or '-'}<br/>"
-    )
-    story.append(Paragraph(txt_mercado, styles["Normal"]))
-    story.append(Spacer(1, 0.2*cm))
-
-    txt_resumo = (
-        f"<b>Itens nesta loja:</b> {len(best_single_map)}<br/>"
-        f"<b>Total estimado:</b> R$ {best_single_total:,.2f}"
-    )
-    story.append(Paragraph(txt_resumo, styles["Normal"]))
-    story.append(Spacer(1, 0.4*cm))
-
-    # Tabela de itens
-    data = [
-        ["Produto", "Marca", "Unid.", "Tam.", "Qtd", "Preço", "Total"]
-    ]
-
-    for pid, info in best_single_map.items():
-        nome = nomes_produtos.get(pid, f"#{pid}")
-        marca = info.get("marca") or ""
-        unidade = info.get("unidade") or ""
-        tam = info.get("tamanho") or 0.0
-        qtd = float(info.get("qtd") or 0.0)
-        preco = float(info.get("preco") or 0.0)
-        total_linha = qtd * preco
-
-        data.append([
-            nome,
-            marca,
-            unidade,
-            f"{tam:.2f}" if tam else "",
-            f"{qtd:.2f}",
-            f"R$ {preco:.2f}",
-            f"R$ {total_linha:.2f}",
-        ])
-
-    tabela = Table(data, repeatRows=1)
-    tabela.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#198754")),  # cabeçalho verde
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, 0), 10),
-        ("BOTTOMPADDING", (0, 0), (-1, 0), 6),
-        ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.whitesmoke, colors.lightgrey]),
-    ]))
-
-    story.append(tabela)
-    story.append(Spacer(1, 0.5*cm))
-
-    story.append(Paragraph(
-        "<i>Gerado pelo ConfereApp para ajudar você a economizar.</i>",
-        styles["Italic"]
-    ))
-
-    doc.build(story)
-    buffer.seek(0)
-
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name="mercado_unico.pdf",
-        mimetype="application/pdf",
-    )
+    return redirect(url_for("lista"))
 
 
 # -------------------------------------------------------
@@ -4694,119 +4578,12 @@ def exportar_unico_pdf():
 @app.route("/exportar_fracionado_pdf")
 @login_required
 def exportar_fracionado_pdf():
-    lat = _to_float(request.args.get("lat"))
-    lng = _to_float(request.args.get("lng"))
-    raio_km = _to_float(request.args.get("raio_km")) or 10.0
-
-    result = comparar(make_internal_call=True, _lat=lat, _lng=lng, _raio_km=raio_km)
-
-    best_split_total  = result["best_split_total"]
-    best_split_groups = result["best_split_groups"]
-    economia          = result["economia"]
-
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        leftMargin=2*cm,
-        rightMargin=2*cm,
-        topMargin=2*cm,
-        bottomMargin=2*cm,
-        title="ConfereApp - Top 3 fracionado",
+    flash(
+        "📄 Função disponível apenas no plano Premium.<br>"
+        "Em breve você poderá gerar PDFs completos para impressão!",
+        "info"
     )
-
-    styles = getSampleStyleSheet()
-    story = []
-
-    # logo + título
-    try:
-        logo = Image(LOGO_PATH, width=4*cm, height=4*cm)
-        logo.hAlign = "LEFT"
-        story.append(logo)
-    except Exception:
-        pass
-
-    story.append(Paragraph("<b>ConfereApp - Top 3 fracionado</b>", styles["Title"]))
-    story.append(Spacer(1, 0.3*cm))
-
-    if best_split_total:
-        txt = f"<b>Total fracionado (até 3 mercados):</b> R$ {best_split_total:,.2f}"
-        story.append(Paragraph(txt, styles["Normal"]))
-        if economia:
-            story.append(Paragraph(
-                f"<b>Economia em relação ao mercado único:</b> "
-                f"<font color='green'>R$ {economia:,.2f}</font>",
-                styles["Normal"]
-            ))
-        story.append(Spacer(1, 0.4*cm))
-    else:
-        story.append(Paragraph("Não foi possível calcular o Top 3 fracionado.", styles["Normal"]))
-        doc.build(story)
-        buffer.seek(0)
-        return send_file(
-            buffer,
-            as_attachment=True,
-            download_name="top3_fracionado.pdf",
-            mimetype="application/pdf",
-        )
-
-    # Um card por mercado (igual à tela)
-    for grupo in best_split_groups:
-        m = grupo["mercado"]
-
-        story.append(Paragraph(
-            f"<b>{m.nome}</b> – {m.cidade or '-'} / {m.bairro or '-'}",
-            styles["Heading3"]
-        ))
-        story.append(Paragraph(
-            f"Itens nesta loja: {grupo['qtd_itens']} &nbsp;&nbsp; "
-            f"Subtotal: <b>R$ {grupo['subtotal']:.2f}</b>",
-            styles["Normal"]
-        ))
-        story.append(Spacer(1, 0.2*cm))
-
-        data = [["Produto", "Marca", "Unid.", "Tam.", "Qtd", "Preço", "Total"]]
-
-        for it in grupo["itens"]:
-            data.append([
-                it["nome"],
-                it["marca"],
-                it["unidade"],
-                f"{it['tamanho']:.2f}" if it["tamanho"] else "",
-                f"{it['qtd']:.2f}",
-                f"R$ {it['preco']:.2f}",
-                f"R$ {it['total_linha']:.2f}",
-            ])
-
-        tabela = Table(data, repeatRows=1)
-        tabela.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0d6efd")),  # azul head
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, 0), 9),
-            ("BOTTOMPADDING", (0, 0), (-1, 0), 6),
-            ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
-            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.whitesmoke, colors.lightgrey]),
-        ]))
-
-        story.append(tabela)
-        story.append(Spacer(1, 0.5*cm))
-
-    story.append(Paragraph(
-        "<i>Gerado pelo ConfereApp – comparação fracionada entre os melhores mercados.</i>",
-        styles["Italic"]
-    ))
-
-    doc.build(story)
-    buffer.seek(0)
-
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name="top3_fracionado.pdf",
-        mimetype="application/pdf",
-    )
+    return redirect(url_for("lista"))
 
 # -----------------------------------------------------------------------------
 # Bootstrap
