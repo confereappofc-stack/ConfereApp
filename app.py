@@ -2038,7 +2038,7 @@ def importar_excel():
         return redirect(url_for('importar_excel'))
 
     try:
-        df = pd.read_excel(file)
+        df = pd.read_excel(filepath, engine='openpyxl')
     except Exception as e:
         print("Erro lendo Excel:", e)
         flash("Erro ao ler arquivo Excel. Verifique o formato.", "danger")
