@@ -2022,29 +2022,40 @@ def logout():
 @app.route('/importar_excel', methods=['GET', 'POST'])
 @login_required
 def importar_excel():
-    if request.method == 'POST':
-        file = request.files.get('arquivo')
-        if not file or file.filename == '':
-            flash("Nenhum arquivo selecionado.", "warning")
-            return redirect(url_for('importar_excel'))
+    # GET: só mostra a tela
+    if request.method == 'GET':
+        return render_template('importar_excel.html')
 
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
+    # POST: processa o arquivo
+    file = request.files.get('arquivo')
+    if not file or file.filename == '':
+        flash("Nenhum arquivo selecionado.", "warning")
+        return redirect(url_for('importar_excel'))
 
-        try:
-            df = pd.read_excel(filepath, engine="openpyxl")
-        except Exception as e:
-            app.logger.exception("Erro lendo Excel: %s", e)
-            flash("Erro ao ler arquivo Excel. Verifique o formato.", "danger")
-            return redirect(url_for('importar_excel'))
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
 
-        # ... resto do processamento dos preços ...
+    # usuário logado
+    uid = session.get('user_id')
+    user = db.session.get(Usuario, uid) if uid else None
+    if not user:
+        flash("Usuário não encontrado na sessão.", "danger")
+        return redirect(url_for('importar_excel'))
 
-        flash("Preços importados com sucesso.", "success")
-        return redirect(url_for('precos'))
+    # flag de admin (ajuste se tiver outra lógica)
+    is_admin = bool(
+        getattr(user, "is_admin_any", False) or
+        getattr(user, "is_admin", False)
+    )
 
-    return render_template('importar_excel.html')
+    # lê o Excel
+    try:
+        df = pd.read_excel(filepath, engine="openpyxl")
+    except Exception as e:
+        app.logger.exception("Erro lendo Excel: %s", e)
+        flash("Erro ao ler arquivo Excel. Verifique o formato.", "danger")
+        return redirect(url_for('importar_excel'))
 
     # -------- Normaliza colunas --------
     colunas = {c.strip().lower(): c for c in df.columns if isinstance(c, str)}
@@ -2082,7 +2093,7 @@ def importar_excel():
     mercado_fixo = None
     mercados_cache = {}
 
-    if user.is_empresa and not is_admin:
+    if getattr(user, "is_empresa", False) and not is_admin:
         # Empresa: sempre importa para o próprio mercado
         mercado_fixo = Mercado.query.get(user.mercado_id)
         if not mercado_fixo:
